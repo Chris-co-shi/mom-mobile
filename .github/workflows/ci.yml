@@ -38,7 +38,25 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        id: install
+        continue-on-error: true
+        shell: bash
+        run: pnpm install --no-frozen-lockfile --reporter=append-only > pnpm-install.log 2>&1
+
+      - name: Upload install diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-install-log
+          path: pnpm-install.log
+          if-no-files-found: error
+
+      - name: Fail when installation failed
+        if: steps.install.outcome == 'failure'
+        shell: bash
+        run: |
+          tail -n 80 pnpm-install.log
+          exit 1
 
       - name: Commit generated lockfile once
         if: github.event_name == 'pull_request' && steps.lockfile.outputs.exists == 'false'
