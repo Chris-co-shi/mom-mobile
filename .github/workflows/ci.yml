@@ -6,16 +6,14 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout source branch
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -28,40 +26,25 @@ jobs:
           node-version: 22
 
       - name: Install dependencies and refresh lockfile
-        run: pnpm install --no-frozen-lockfile
+        id: install
+        continue-on-error: true
+        shell: bash
+        run: pnpm install --no-frozen-lockfile --reporter=append-only > pnpm-install.log 2>&1
 
-      - name: Commit refreshed lockfile through GitHub API
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Upload install diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-refresh-log
+          path: pnpm-install.log
+          if-no-files-found: error
+
+      - name: Fail when install failed
+        if: steps.install.outcome == 'failure'
         shell: bash
         run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            echo "pnpm-lock.yaml is already current"
-            exit 0
-          fi
-          python - <<'PY'
-          import base64, json, os, subprocess
-          from pathlib import Path
-          branch = os.environ.get("GITHUB_HEAD_REF") or os.environ["GITHUB_REF_NAME"]
-          current_sha = subprocess.check_output(
-              ["git", "rev-parse", "HEAD:pnpm-lock.yaml"], text=True
-          ).strip()
-          payload = {
-              "message": "chore: update pnpm lockfile",
-              "content": base64.b64encode(Path("pnpm-lock.yaml").read_bytes()).decode("ascii"),
-              "branch": branch,
-              "sha": current_sha,
-          }
-          Path("lock-payload.json").write_text(json.dumps(payload), encoding="utf-8")
-          PY
-          curl --fail-with-body --silent --show-error \
-            --request PUT \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer ${GH_TOKEN}" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/pnpm-lock.yaml" \
-            --data-binary @lock-payload.json
+          tail -n 100 pnpm-install.log
+          exit 1
 
       - name: Validate repository boundaries
         run: pnpm validate
