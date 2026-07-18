@@ -6,14 +6,26 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Checkout source branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Detect committed lockfile
+        id: lockfile
+        shell: bash
+        run: |
+          if git ls-files --error-unmatch pnpm-lock.yaml >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -28,18 +40,54 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Upload generated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-pnpm-lock
-          path: pnpm-lock.yaml
-          if-no-files-found: error
+      - name: Commit generated lockfile through GitHub API
+        if: github.event_name == 'pull_request' && steps.lockfile.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          branch="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          python - <<'PY'
+          import base64, json, os
+          from pathlib import Path
+          payload = {
+              "message": "chore: add pnpm lockfile",
+              "content": base64.b64encode(Path("pnpm-lock.yaml").read_bytes()).decode("ascii"),
+              "branch": os.environ["GITHUB_HEAD_REF"] or os.environ["GITHUB_REF_NAME"],
+          }
+          Path("lock-payload.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+          curl --fail-with-body --silent --show-error \
+            --request PUT \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/pnpm-lock.yaml" \
+            --data-binary @lock-payload.json
 
       - name: Validate repository boundaries
         run: pnpm validate
 
       - name: Type check
-        run: pnpm type-check
+        id: typecheck
+        continue-on-error: true
+        shell: bash
+        run: pnpm type-check > typecheck.log 2>&1
+
+      - name: Upload type-check diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-log
+          path: typecheck.log
+          if-no-files-found: error
+
+      - name: Fail when type check failed
+        if: steps.typecheck.outcome == 'failure'
+        shell: bash
+        run: |
+          cat typecheck.log
+          exit 1
 
       - name: Build H5 verification target
         run: pnpm build:h5
