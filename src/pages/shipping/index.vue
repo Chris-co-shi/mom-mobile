@@ -1,0 +1,1 @@
+<template><view class="page"><text class="title">发运确认</text><text class="desc">扫描发运单、托盘和装车口，验证放行状态并生成发运回执。</text><button>扫描发运单</button></view></template><style scoped>.page{padding:32rpx}.title,.desc{display:block}.title{font-size:40rpx;font-weight:800}.desc{margin:20rpx 0 40rpx;color:#64748b;line-height:1.7}button{background:#153e52;color:#fff}</style>

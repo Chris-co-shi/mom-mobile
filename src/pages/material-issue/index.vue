@@ -1,0 +1,1 @@
+<template><view class="page"><text class="title">生产领料</text><text class="desc">扫描工单、原料批次和容器，校验质量状态、预占数量与有效期。</text><button>扫描生产工单</button></view></template><style scoped>.page{padding:32rpx}.title,.desc{display:block}.title{font-size:40rpx;font-weight:800}.desc{margin:20rpx 0 40rpx;color:#64748b;line-height:1.7}button{background:#153e52;color:#fff}</style>
