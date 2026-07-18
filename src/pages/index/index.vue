@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, onShow } from 'vue';
+import { ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import NetworkBadge from '@/components/NetworkBadge.vue';
 import OperationCard from '@/components/OperationCard.vue';
 import { offlineQueue } from '@/offline/service';
 
-const queueCount = computed(() => offlineQueue.list().length);
-onShow(() => queueCount.value);
+const queueCount = ref(0);
+onShow(() => {
+  queueCount.value = offlineQueue.list().length;
+});
 </script>
 
 <template>
