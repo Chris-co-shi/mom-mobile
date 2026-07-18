@@ -1,7 +1,76 @@
-# Third-party notices
+# 第三方软件与来源声明
 
-This repository uses uni-app and related DCloud packages under their applicable licenses, including Apache-2.0 components.
+`mom-mobile` 使用开源软件构建 uni-app Vue 3 移动端应用。各第三方组件继续适用其自身许可证，本仓库的 MIT License 不改变第三方许可证义务。
 
-The initial source and dependency baseline is derived from the official `dcloudio/uni-preset-vue` Vue 3 TypeScript template. MOM business code, offline behavior, industrial workflows, and UI structure are independently designed.
+## 1. uni-app 与 DCloud 组件
 
-Before copying any additional upstream source, record the exact repository, ref, path, license, and local modifications in `docs/open-source/source-origin.md`.
+- 上游：`dcloudio/uni-app`、`dcloudio/uni-preset-vue`。
+- 当前匹配发行标识：`3.0.0-5010520260709002`。
+- 用途：uni-app App/H5 运行、组件和 Vite 集成。
+- 许可证：按上游仓库和具体发布包声明，包含 Apache-2.0 组件。
+
+DCloud 相关运行包必须使用匹配版本，禁止随意混用不同发行标识。
+
+初始项目结构参考官方 `vite-ts` 模板。MOM 工业流程、离线命令、平台适配器、页面结构和原型由本项目自主设计。
+
+## 2. 核心运行与开发依赖
+
+当前包括：
+
+- Vue。
+- Pinia。
+- Vue I18n。
+- Vite。
+- TypeScript。
+- vue-tsc。
+- Sass。
+
+精确版本以 `package.json` 和 `pnpm-lock.yaml` 为准，来源和用途见 `docs/open-source/source-origin.md`。
+
+## 3. 工业设备 SDK
+
+当前公开仓库尚未提交特定 PDA、打印机、称重设备或扫描头的商业 SDK。
+
+未来接入时必须先确认：
+
+- 使用和再分发权限。
+- 是否允许进入公开仓库。
+- 支持设备和 Android 版本。
+- 二进制 Hash 和来源。
+- 署名、NOTICE 和商业授权要求。
+
+无公开分发权的 SDK 应通过私有构建依赖或受控制品库提供，不得直接提交到本仓库。
+
+## 4. 静态资源
+
+新增以下资源时必须记录来源和许可：
+
+- 图标。
+- 字体。
+- 音效。
+- 图片。
+- 扫码提示音。
+- 设备插图。
+
+禁止使用来源不明资源或真实客户素材。
+
+## 5. 源码迁移
+
+从上游复制源码时必须登记：
+
+- 仓库和精确 Ref。
+- 原始文件路径。
+- 许可证。
+- 本地修改。
+- 版权头和 NOTICE 要求。
+
+不得删除上游版权或许可证声明。
+
+## 6. 发布前检查
+
+- 锁文件已更新。
+- 新依赖已登记。
+- Android 原生插件许可证已核验。
+- 厂商 SDK 分发权已确认。
+- 图标、字体和音效来源可追溯。
+- 正式安装包中不存在无授权二进制。
