@@ -1,16 +1,106 @@
-# VS-01 mobile prototype backlog
+# VS-01 移动端原型 Backlog
 
-Required portrait prototypes:
+## 1. 当前状态
 
-1. receiving task list
-2. supplier delivery scan
-3. container and weight confirmation
-4. incoming inspection handoff
-5. putaway container/location double scan
-6. production material issue
-7. production material return
-8. finished-goods putaway
-9. shipping load confirmation
-10. offline command queue and conflict handling
+本目录已完成原型范围和交付规范，尚未提交正式页面原型图片。
 
-Each prototype must annotate scan source, API contract, permission, data scope, idempotency key, offline rule, and recovery behavior.
+## 2. 原型清单
+
+### 工作台
+
+1. 角色任务首页。
+2. 网络和离线队列状态。
+3. 设备诊断与版本信息。
+
+### 原料收货
+
+4. 待收货任务列表。
+5. 供应商送货单扫描。
+6. 送货信息校验。
+7. 容器扫描或生成。
+8. 重量录入。
+9. 收货确认摘要。
+10. 收货完成结果。
+
+### 检验与上架
+
+11. 待检批次查询。
+12. 检验交接确认。
+13. 上架容器扫描。
+14. 目标库位扫描。
+15. 库位冲突和人工处理。
+16. 上架完成结果。
+
+### 生产物流
+
+17. 工单任务列表。
+18. 工单扫描和物料需求。
+19. 物料/容器扫描。
+20. 领料数量确认。
+21. 领料完成结果。
+22. 退料原因和数量。
+23. 退料目标容器。
+
+### 成品与发运
+
+24. 成品入库任务。
+25. 成品批次和质量状态。
+26. 成品库位双扫描。
+27. 发运单扫描。
+28. 装车容器连续扫描。
+29. 发运确认结果。
+
+### 离线与异常
+
+30. 离线命令列表。
+31. 命令详情。
+32. 同步中。
+33. 可重试失败。
+34. 冲突对比。
+35. 结果未知查询。
+36. 会话过期。
+37. 扫描设备故障。
+38. 人工接管。
+
+## 3. 每张原型必须标注
+
+- 页面编号和版本。
+- 角色。
+- 当前工厂和任务上下文。
+- 扫描来源。
+- API 契约。
+- 权限码。
+- 数据范围。
+- 幂等要求。
+- 是否允许离线。
+- 错误码和恢复动作。
+
+## 4. 优先级
+
+### P0
+
+- 工作台。
+- 收货全流程。
+- 上架双扫描。
+- 离线队列和冲突。
+
+### P1
+
+- 领料和退料。
+- 成品入库。
+- 发运确认。
+
+### P2
+
+- 设备诊断。
+- 打印状态。
+- 主管批量处置。
+
+## 5. 完成定义
+
+- P0/P1 页面正常态和关键异常态图片完成。
+- 页面状态矩阵完成。
+- 用户流程完成。
+- API 和组件映射完成。
+- 原型在目标 PDA 画布上评审通过。
+- 业务页面实现尚未开始时，文档仍明确标记为设计阶段。

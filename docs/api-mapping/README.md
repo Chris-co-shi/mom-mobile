@@ -1,5 +1,87 @@
-# API mapping
+# 移动端 API 映射规范
 
-Each page specification records Gateway route, method, permission, factory scope, idempotency requirement, offline eligibility, error codes, and expected response state.
+每个页面必须在实现前完成 API、权限、幂等、离线和错误映射。
 
-The first VS-01 receiving command will target `POST /api/wms/receipts` only after the backend contract is approved.
+## 1. 页面映射模板
+
+| 字段 | 内容 |
+|---|---|
+| 页面编号 | `MOB-REC-001` |
+| 页面名称 | 送货单扫描 |
+| 查询 API | 方法、Gateway 路径 |
+| 命令 API | 方法、Gateway 路径 |
+| 状态查询 API | 结果未知时使用 |
+| OAuth Client | PDA Client |
+| 权限码 | 页面和命令权限 |
+| 工厂范围 | 当前工厂/仓库 |
+| 幂等键 | 是否需要、生成时机、复用范围 |
+| correlation ID | 生成和展示规则 |
+| 离线资格 | 允许/禁止/条件允许 |
+| 最大离线时长 | 例如 30 分钟 |
+| 业务错误码 | 页面处理方式 |
+| 冲突策略 | 刷新、修正、取消、转人工 |
+| 敏感字段 | 日志和本地存储限制 |
+
+## 2. Gateway 规则
+
+- 所有路径以 Gateway 为入口。
+- 文档不得记录内部服务地址供移动端调用。
+- 环境 Base URL 通过构建或运行配置注入。
+
+## 3. 查询与命令分离
+
+查询 API 可以安全重试，但需考虑限流。
+
+命令 API 必须记录：
+
+- 幂等键。
+- 业务命令类型。
+- 状态查询方式。
+- 是否允许离线。
+- 超时后的处理。
+
+## 4. 离线映射
+
+允许离线的命令需要额外记录：
+
+- 命令 Schema 版本。
+- 所需本地数据。
+- 同步前重新校验项。
+- 队列顺序要求。
+- 与其他命令的依赖。
+- 冲突处理规则。
+
+## 5. 错误映射
+
+| 类型 | 页面动作 |
+|---|---|
+| 参数错误 | 定位字段并允许修正 |
+| 会话过期 | 保存草稿并重新登录 |
+| 无权限 | 返回工作台或申请权限 |
+| 对象不存在 | 清除无效扫描并刷新 |
+| 业务冲突 | 展示服务端快照 |
+| 限流 | 显示等待时间 |
+| 服务异常 | 可重试或转离线，取决于命令状态 |
+| 结果未知 | 调用状态查询 |
+
+## 6. 收货示例
+
+> 以下路径是待后端契约批准的目标，不代表已经可用。
+
+| 项目 | 示例 |
+|---|---|
+| 查询送货单 | `GET /api/wms/deliveries/{code}` |
+| 创建收货 | `POST /api/wms/receipts` |
+| 查询命令状态 | `GET /api/commands/{correlationId}` |
+| 权限码 | `wms:receipt:create` |
+| 幂等 | 必须 |
+| 离线 | 条件允许 |
+| 冲突 | 送货单状态变化、容器占用、数量变化 |
+
+## 7. 验收
+
+- 页面代码中的 API 都可在文档中找到。
+- 每个写命令都有幂等和结果查询策略。
+- 离线资格不是页面临时决定。
+- 409、429 和超时均有明确页面状态。
+- API 契约未批准前不得把示例路径描述为已上线接口。
