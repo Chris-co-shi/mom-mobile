@@ -1,0 +1,46 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "MOM PDA"
+      }
+    },
+    {
+      "path": "pages/receiving/index",
+      "style": {
+        "navigationBarTitleText": "原料收货"
+      }
+    },
+    {
+      "path": "pages/putaway/index",
+      "style": {
+        "navigationBarTitleText": "上架确认"
+      }
+    },
+    {
+      "path": "pages/material-issue/index",
+      "style": {
+        "navigationBarTitleText": "生产领料"
+      }
+    },
+    {
+      "path": "pages/shipping/index",
+      "style": {
+        "navigationBarTitleText": "发运确认"
+      }
+    },
+    {
+      "path": "pages/offline/index",
+      "style": {
+        "navigationBarTitleText": "离线任务"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "MOM PDA",
+    "navigationBarBackgroundColor": "#153e52",
+    "backgroundColor": "#f3f6f8"
+  }
+}
