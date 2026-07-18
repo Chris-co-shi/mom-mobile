@@ -6,26 +6,14 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout source branch
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-
-      - name: Detect existing lockfile
-        id: lockfile
-        shell: bash
-        run: |
-          if [[ -f pnpm-lock.yaml ]]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -38,35 +26,14 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        id: install
-        continue-on-error: true
-        shell: bash
-        run: pnpm install --no-frozen-lockfile --reporter=append-only > pnpm-install.log 2>&1
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Upload install diagnostics
-        if: always()
+      - name: Upload generated lockfile
         uses: actions/upload-artifact@v4
         with:
-          name: pnpm-install-log
-          path: pnpm-install.log
+          name: generated-pnpm-lock
+          path: pnpm-lock.yaml
           if-no-files-found: error
-
-      - name: Fail when installation failed
-        if: steps.install.outcome == 'failure'
-        shell: bash
-        run: |
-          tail -n 80 pnpm-install.log
-          exit 1
-
-      - name: Commit generated lockfile once
-        if: github.event_name == 'pull_request' && steps.lockfile.outputs.exists == 'false'
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore: add pnpm lockfile"
-          git push origin "HEAD:${{ github.head_ref }}"
 
       - name: Validate repository boundaries
         run: pnpm validate
