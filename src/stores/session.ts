@@ -1,10 +1,18 @@
 import { defineStore } from 'pinia';
 
 export const useSessionStore = defineStore('session', {
-  state: () => ({ accessToken: '', factoryId: 'factory-demo-01', userName: 'PDA Operator' }),
+  state: () => ({ factoryId: '', userName: '', authenticated: false }),
   actions: {
-    setAccessToken(token: string) { this.accessToken = token; },
+    establish(userName: string, factoryId: string | null) {
+      this.userName = userName;
+      this.factoryId = factoryId ?? '';
+      this.authenticated = true;
+    },
     setFactory(factoryId: string) { this.factoryId = factoryId; },
-    clear() { this.accessToken = ''; },
+    clear() {
+      this.factoryId = '';
+      this.userName = '';
+      this.authenticated = false;
+    },
   },
 });

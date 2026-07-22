@@ -17,7 +17,8 @@
 ## 当前阶段
 
 - Mobile Phase 01：应用、适配器、API Client 和离线队列基础已具备。
-- P1.5 S00：Mobile 认证授权设计已对齐，正式实现安排在 S11。
+- P1.5 S11：Mobile Auth Runtime、Android 安全存储边界、冷启动/Single Flight 与离线身份门禁已在阶段分支完成。
+- P1.5 S12：安全 E2E、Android 真机证据与三仓库封板进行中。
 
 ## P1.5 认证与授权
 
@@ -52,6 +53,7 @@
 - [API、幂等与错误处理](architecture/API幂等与错误处理.md)
 - [认证、权限与工厂范围](architecture/认证权限与工厂范围.md)
 - [本地存储与数据安全](architecture/本地存储与数据安全.md)
+- [Android 安全存储与 App Link 实现边界](architecture/Android安全存储与App-Link实现边界.md)
 - [移动端可观测性](architecture/移动端可观测性.md)
 
 ## 设计交付
@@ -66,6 +68,7 @@
 ## 测试与发布
 
 - [移动端测试策略](testing/移动端测试策略.md)
+- [P1.5 S11 Android 真机验收清单](testing/P1.5-S11-Android真机验收清单.md)
 - [Android 构建发布与签名](release/Android构建发布与签名.md)
 - [环境配置与版本发布](release/环境配置与版本发布.md)
 

@@ -1,5 +1,9 @@
 name: Mobile CI
 
+concurrency:
+  group: mobile-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   push:
@@ -34,6 +38,9 @@ jobs:
 
       - name: Type check
         run: pnpm type-check
+
+      - name: Test Mobile Auth Runtime
+        run: pnpm test:auth
 
       - name: Build H5 verification target
         run: pnpm build:h5

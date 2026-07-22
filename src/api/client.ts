@@ -1,33 +1,38 @@
 import { createRequestId } from '@/idempotency';
+import type { MobileAuthRuntime } from '@/auth';
 
 const baseUrl = import.meta.env.VITE_MOM_API_BASE_URL || 'http://localhost:8080';
+let authRuntime: MobileAuthRuntime | null = null;
 
 export interface RequestContext {
-  accessToken?: string;
-  factoryId?: string;
   correlationId?: string;
   idempotencyKey?: string;
 }
 
-export function request<T>(path: string, options: UniApp.RequestOptions & { context?: RequestContext }): Promise<T> {
+export interface BusinessRequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  data?: unknown;
+  header?: Record<string, string>;
+  context?: RequestContext;
+}
+
+export function configureAuthenticatedClient(runtime: MobileAuthRuntime): void {
+  authRuntime = runtime;
+}
+
+export async function request<T>(path: string, options: BusinessRequestOptions = {}): Promise<T> {
+  if (!authRuntime) throw new Error('Mobile Auth Runtime 尚未配置');
   const context = options.context || {};
-  return new Promise((resolve, reject) => {
-    uni.request({
-      ...options,
-      url: `${baseUrl}${path}`,
-      header: {
-        'Content-Type': 'application/json',
-        'X-Correlation-Id': context.correlationId || createRequestId('corr'),
-        ...(context.factoryId ? { 'X-Factory-Id': context.factoryId } : {}),
-        ...(context.idempotencyKey ? { 'X-Idempotency-Key': context.idempotencyKey } : {}),
-        ...(context.accessToken ? { Authorization: `Bearer ${context.accessToken}` } : {}),
-        ...(options.header || {}),
-      },
-      success: (response) => {
-        if (response.statusCode >= 200 && response.statusCode < 300) resolve(response.data as T);
-        else reject(new Error(`HTTP ${response.statusCode}`));
-      },
-      fail: (error) => reject(new Error(error.errMsg || '网络请求失败')),
-    });
+  const response = await authRuntime.request<T>({
+    url: `${baseUrl}${path}`,
+    method: options.method ?? 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Correlation-Id': context.correlationId || createRequestId('corr'),
+      ...(context.idempotencyKey ? { 'X-Idempotency-Key': context.idempotencyKey } : {}),
+      ...(options.header || {}),
+    },
+    ...(options.data === undefined ? {} : { body: JSON.stringify(options.data) }),
   });
+  return response.body;
 }

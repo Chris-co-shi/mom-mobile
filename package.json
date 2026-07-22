@@ -11,8 +11,9 @@
     "dev:h5": "uni",
     "build:h5": "uni build",
     "type-check": "vue-tsc --noEmit",
+    "test:auth": "vitest run --config vitest.config.ts src/auth src/offline",
     "validate": "node scripts/validate.mjs",
-    "check": "pnpm validate && pnpm type-check && pnpm build:h5"
+    "check": "pnpm validate && pnpm type-check && pnpm test:auth && pnpm build:h5"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5010520260709002",
@@ -30,6 +31,7 @@
     "sass": "1.101.0",
     "typescript": "5.8.3",
     "vite": "5.2.8",
+    "vitest": "3.2.4",
     "vue-tsc": "2.2.12"
   }
 }

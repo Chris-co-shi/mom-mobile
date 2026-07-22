@@ -2,7 +2,7 @@
 
 ## 1. 阶段状态
 
-- 状态：**Foundation Complete / Auth Pending**
+- 状态：**Foundation Complete / P1.5 S11 Auth Runtime Complete**
 - 后续安全阶段：[P1.5 Mobile 认证与授权实施计划](P1.5-Mobile认证授权实施计划.md)
 
 > Mobile Phase 01 已完成工程、页面、平台适配器、Gateway Request Client 和基础离线命令骨架，但未完成正式 Android OAuth/OIDC Auth Runtime。
