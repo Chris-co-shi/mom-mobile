@@ -152,8 +152,8 @@ src/
 | 包管理 | pnpm 11.7 |
 | Node.js | 22.x |
 | CI 验证目标 | H5（非正式 Auth 安全验收） |
-| 正式登录 | 系统浏览器 + PKCE + HTTPS App Link（S11 实现） |
-| Token | Access 内存；Refresh Android 安全存储（S11 实现） |
+| 正式登录 | 系统浏览器 + PKCE S256 + OIDC + HTTPS App Link |
+| Token | Access 仅内存；Refresh 仅 Android 安全存储 Adapter |
 
 ## 🚀 快速开始
 
@@ -168,6 +168,7 @@ pnpm dev:h5
 ```bash
 pnpm validate
 pnpm type-check
+pnpm test:auth
 pnpm build:h5
 ```
 
@@ -197,9 +198,9 @@ pnpm check
 | 阶段 | 目标 | 状态 |
 |---|---|---|
 | Mobile Phase 01 | App、页面、Adapter、API Client、离线队列基础 | ✅ 基础完成 |
-| P1.5 S00 | Mobile 认证授权设计对齐 | 🚧 PR Review |
-| P1.5 S11 | Mobile Auth Runtime | ⏳ 计划中 |
-| P1.5 S12 | Android 真机、安全 E2E 与封板 | ⏳ 计划中 |
+| P1.5 S00 | Mobile 认证授权设计对齐 | ✅ 已完成 |
+| P1.5 S11 | Mobile Auth Runtime | ✅ 阶段分支完成 |
+| P1.5 S12 | Android 真机、安全 E2E 与封板 | 🚧 进行中 |
 
 ## 🧠 移动端原则
 

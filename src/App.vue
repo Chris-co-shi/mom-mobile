@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { onLaunch } from '@dcloudio/uni-app';
+import { onLaunch, onShow } from '@dcloudio/uni-app';
 import { initializeNetworkMonitor } from '@/platform/network';
+import { getMobileAuthRuntime } from '@/auth';
 
 onLaunch(() => {
   initializeNetworkMonitor();
+  void getMobileAuthRuntime()?.restoreColdStart();
+});
+
+onShow(() => {
+  const runtime = getMobileAuthRuntime();
+  if (runtime?.getSnapshot().status === 'AUTHENTICATED') void runtime.refresh();
 });
 </script>
 

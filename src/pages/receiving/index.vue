@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { scanner } from '@/platform/scanner';
 import { networkState } from '@/platform/network';
-import { enqueueCommand } from '@/offline/service';
 
 const deliveryCode = ref('');
 const message = ref('请扫描供应商送货单');
@@ -13,8 +12,7 @@ async function scanDelivery() {
 function submit() {
   if (!deliveryCode.value) return uni.showToast({ title: '请先扫码', icon: 'none' });
   if (!networkState.value.isConnected) {
-    enqueueCommand({ endpoint: '/api/wms/receipts', method: 'POST', payload: { deliveryCode: deliveryCode.value } });
-    return uni.showToast({ title: '已加入离线队列', icon: 'none' });
+    return uni.showToast({ title: '请先完成 Mobile 登录后再创建离线命令', icon: 'none' });
   }
   uni.showToast({ title: '在线提交将在 VS-01 接入', icon: 'none' });
 }
