@@ -30,6 +30,7 @@ export interface AuthorizationTransactionStore {
 export interface IdTokenValidationInput {
   idToken: string;
   issuer: string;
+  jwksUri: string;
   audience: string;
   nonce: string;
   nowEpochSeconds: number;

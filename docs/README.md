@@ -2,7 +2,7 @@
 
 本目录是 `mom-mobile` 的产品需求、移动端架构、认证运行时、原型、页面状态、离线策略、测试发布和架构决策权威入口。
 
-> 文档变更使用与具体 Work/Slice 对应的任务分支。本次 P1.5 S00 使用 `feat/p15-s00-design-baseline`；历史 `agent/complete-chinese-docs` 仅作为既有文档整理分支。
+> P1.5 S00、S11、S12 已完成并合并。当前清理继续使用既有 `phase/p1.5-auth-authorization`；Phase 02 从清理后的最新 `main` 开始。
 
 ## 文档原则
 
@@ -17,8 +17,9 @@
 ## 当前阶段
 
 - Mobile Phase 01：应用、适配器、API Client 和离线队列基础已具备。
-- P1.5 S11：Mobile Auth Runtime、Android 安全存储边界、冷启动/Single Flight 与离线身份门禁已在阶段分支完成。
-- P1.5 S12：安全 E2E、Android 真机证据与三仓库封板进行中。
+- P1.5：**Completed / Merged**，Mobile Auth Runtime、冷启动/Single Flight、离线身份门禁与安全 E2E 已完成。
+- Android Keystore、HTTPS App Link 与真机强杀恢复：Phase 02 Mobile 正式联调前置验收项。
+- Phase 02：**Pending / Ready after preflight cleanup**。
 
 ## P1.5 认证与授权
 

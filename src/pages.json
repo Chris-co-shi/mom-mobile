@@ -13,24 +13,6 @@
       }
     },
     {
-      "path": "pages/putaway/index",
-      "style": {
-        "navigationBarTitleText": "上架确认"
-      }
-    },
-    {
-      "path": "pages/material-issue/index",
-      "style": {
-        "navigationBarTitleText": "生产领料"
-      }
-    },
-    {
-      "path": "pages/shipping/index",
-      "style": {
-        "navigationBarTitleText": "发运确认"
-      }
-    },
-    {
       "path": "pages/offline/index",
       "style": {
         "navigationBarTitleText": "离线任务"

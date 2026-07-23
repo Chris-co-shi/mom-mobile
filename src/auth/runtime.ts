@@ -90,7 +90,8 @@ export class MobileAuthRuntime {
       });
       if (!tokens.id_token) throw new AuthRuntimeError('missing_id_token', 'OIDC 响应缺少 ID Token');
       await this.idTokenValidator.validate({
-        idToken: tokens.id_token, issuer: this.config.issuer, audience: MOBILE_CLIENT_ID,
+        idToken: tokens.id_token, issuer: this.config.issuer, jwksUri: this.config.jwksUri,
+        audience: MOBILE_CLIENT_ID,
         nonce: transaction.nonce, nowEpochSeconds: Math.floor(this.now() / 1000),
       });
       if (await this.secureStorage.storeInitial(tokens.refresh_token) !== 'COMMITTED') {
@@ -167,6 +168,7 @@ export class MobileAuthRuntime {
     }
     const response = await this.transport.request<T>({
       ...request,
+      url: this.resolveGatewayApiUrl(request.url),
       headers: {
         ...request.headers,
         Authorization: `Bearer ${this.accessToken}`,
@@ -178,7 +180,7 @@ export class MobileAuthRuntime {
       return this.requestOnce<T>(request, true);
     }
     if (response.status < 200 || response.status >= 300) {
-      throw new HttpStatusError(response.status, response.body);
+      throw new HttpStatusError(response.status, response.body, response.headers);
     }
     return response;
   }
@@ -188,6 +190,15 @@ export class MobileAuthRuntime {
       throw new AuthRuntimeError('factory_not_authorized', 'Factory 不在 /api/iam/me 授权范围内');
     }
     this.snapshot.currentFactoryId = factoryId;
+  }
+
+  private resolveGatewayApiUrl(value: string): string {
+    const gateway = new URL(this.config.gatewayBaseUrl);
+    const resolved = new URL(value, `${gateway.toString().replace(/\/$/, '')}/`);
+    if (resolved.origin !== gateway.origin || !resolved.pathname.startsWith('/api/')) {
+      throw new AuthRuntimeError('invalid_business_api_url', 'Bearer 业务请求只能访问配置的 Gateway /api 路径');
+    }
+    return resolved.toString();
   }
 
   async logout(): Promise<void> {
@@ -215,10 +226,10 @@ export class MobileAuthRuntime {
 
   private async loadAndEstablishContext(accessToken: string): Promise<MobileAccessContext> {
     const response = await this.transport.request<MobileAccessContextResponse>({
-      url: `${this.config.issuer.replace(/\/$/, '')}/api/iam/me`, method: 'GET',
+      url: `${this.config.gatewayBaseUrl.replace(/\/$/, '')}/api/iam/me`, method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (response.status !== 200) throw new HttpStatusError(response.status, response.body);
+    if (response.status !== 200) throw new HttpStatusError(response.status, response.body, response.headers);
     const claims = decodeAccessClaims(accessToken);
     const context = response.body;
     if (context.userType !== 'INTERNAL' || context.clientId !== MOBILE_CLIENT_ID

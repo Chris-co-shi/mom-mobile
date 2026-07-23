@@ -19,9 +19,6 @@ onShow(() => {
     </view>
     <view class="section-title">现场任务</view>
     <OperationCard title="原料收货" description="送货单、容器、重量与待检批次" path="/pages/receiving/index" />
-    <OperationCard title="上架确认" description="容器与目标库位双扫码" path="/pages/putaway/index" />
-    <OperationCard title="生产领料" description="工单、原料批次与数量确认" path="/pages/material-issue/index" />
-    <OperationCard title="发运确认" description="发运单、托盘与装车复核" path="/pages/shipping/index" />
     <OperationCard title="离线任务" description="待同步、失败与人工重试" path="/pages/offline/index" :count="queueCount" />
   </view>
 </template>

@@ -13,16 +13,34 @@ export function createMobileAuthRuntime(
   secureStorage: RefreshTokenSecureStorage,
   overrides: Partial<AuthRuntimeConfig> = {},
 ): MobileAuthRuntime {
-  const issuer = (overrides.issuer ?? import.meta.env.VITE_MOM_IAM_ISSUER ?? 'http://127.0.0.1:8100').replace(/\/$/, '');
+  const issuer = (overrides.issuer ?? import.meta.env.VITE_MOM_IAM_ISSUER ?? 'http://127.0.0.1:20100').replace(/\/$/, '');
+  const gatewayBaseUrl = (overrides.gatewayBaseUrl
+    ?? import.meta.env.VITE_MOM_GATEWAY_BASE_URL
+    ?? 'http://127.0.0.1:20000').replace(/\/$/, '');
   const config: AuthRuntimeConfig = {
     issuer,
-    authorizationEndpoint: `${issuer}/oauth2/authorize`,
-    tokenEndpoint: `${issuer}/oauth2/token`,
+    authorizationEndpoint: overrides.authorizationEndpoint
+      ?? import.meta.env.VITE_MOM_AUTHORIZATION_ENDPOINT
+      ?? `${issuer}/oauth2/authorize`,
+    tokenEndpoint: overrides.tokenEndpoint
+      ?? import.meta.env.VITE_MOM_TOKEN_ENDPOINT
+      ?? `${issuer}/oauth2/token`,
+    jwksUri: overrides.jwksUri
+      ?? import.meta.env.VITE_MOM_JWKS_URI
+      ?? `${issuer}/oauth2/jwks`,
+    gatewayBaseUrl,
     redirectUri: import.meta.env.VITE_MOM_MOBILE_REDIRECT_URI ?? 'http://127.0.0.1:5173/oauth2/callback',
     ...overrides,
   };
-  if (import.meta.env.PROD && (!config.redirectUri.startsWith('https://') || !config.issuer.startsWith('https://'))) {
-    throw new Error('正式环境必须使用 HTTPS Issuer 与已验证 HTTPS App Link');
+  if (import.meta.env.PROD && [
+    config.issuer,
+    config.authorizationEndpoint,
+    config.tokenEndpoint,
+    config.jwksUri,
+    config.gatewayBaseUrl,
+    config.redirectUri,
+  ].some((url) => !url.startsWith('https://'))) {
+    throw new Error('正式环境必须配置 HTTPS Gateway、HTTPS Issuer、HTTPS 协议端点与已验证 HTTPS App Link');
   }
   const transport = new UniHttpTransport();
   const runtime = new MobileAuthRuntime(

@@ -12,7 +12,7 @@
   </a>
   <img alt="uni-app" src="https://img.shields.io/badge/uni--app-Vue%203-2B9939?logo=vue.js&logoColor=white">
   <img alt="Target" src="https://img.shields.io/badge/Product%20Target-Android%20PDA-3DDC84?logo=android&logoColor=white">
-  <img alt="Status" src="https://img.shields.io/badge/Status-P1.5%20Mobile%20Baseline-2563EB">
+  <img alt="Status" src="https://img.shields.io/badge/Status-Phase%2002%20Ready-2563EB">
 </p>
 
 [文档中心](docs/README.md) · [P1.5 Mobile 运行时](docs/architecture/P1.5-Mobile认证授权运行时基线.md) · [P1.5 Mobile 计划](docs/plans/P1.5-Mobile认证授权实施计划.md) · [离线同步](docs/architecture/离线命令队列与同步.md) · [ADR](docs/adr/README.md)
@@ -22,7 +22,7 @@
 ---
 
 > [!IMPORTANT]
-> 当前仓库已具备可运行的 uni-app Vue 3 骨架、H5 构建、扫码/网络/普通存储适配器、Gateway Request Client、离线命令入队和基础 PDA 页面；正式系统浏览器 OAuth/OIDC、HTTPS App Link、Android Token 安全存储、Session 恢复和完整离线身份归属尚未实现。当前阶段为 **P1.5：认证与授权闭环，S00 Mobile 设计对齐**。
+> P1.5 Mobile Auth Runtime 已完成并合并：系统浏览器 OAuth/OIDC、PKCE、内存 Access Token、Android Keystore Adapter Contract、Session 恢复、Gateway `/api/iam/me` 与离线身份门禁均已交付。Android Keystore、HTTPS App Link 与真机强杀恢复是 Phase 02 正式 Mobile 联调前置验收项。
 
 ## 🌟 项目定位
 
@@ -106,13 +106,13 @@ flowchart LR
 
 ## 📱 当前页面骨架
 
-| 页面 | 当前状态 | P1.5/V1 目标 |
+| 页面 | 当前运行时状态 | Phase 02 目标 |
 |---|---|---|
 | 首页工作台 | 已有骨架 | 基于 `/api/iam/me` 和 Permission 展示待办 |
 | 原料收货 | 已有骨架 | 扫码、Factory/Permission 与离线命令归属 |
-| 上架确认 | 已有骨架 | 容器与库位双扫描 |
-| 生产领料 | 已有骨架 | 工单、物料、批次和数量确认 |
-| 发运确认 | 已有骨架 | 发运单、托盘/容器和装车确认 |
+| 上架确认 | 不进入当前运行时导航 | 收货链契约冻结后启用 |
+| 生产领料 | 后续阶段，运行时禁用 | Phase 03 实现 |
+| 发运确认 | 后续阶段，运行时禁用 | Phase 03 实现 |
 | 离线队列 | 已有骨架 | user/sid/client/factory/party/permission、冲突和人工处理 |
 | 生产退料 | 待设计 | 退料原因、数量和容器确认 |
 | 成品入库 | 待设计 | 成品容器、质量状态与库位 |
@@ -199,8 +199,9 @@ pnpm check
 |---|---|---|
 | Mobile Phase 01 | App、页面、Adapter、API Client、离线队列基础 | ✅ 基础完成 |
 | P1.5 S00 | Mobile 认证授权设计对齐 | ✅ 已完成 |
-| P1.5 S11 | Mobile Auth Runtime | ✅ 阶段分支完成 |
-| P1.5 S12 | Android 真机、安全 E2E 与封板 | 🚧 进行中 |
+| P1.5 S11 | Mobile Auth Runtime | ✅ Completed / Merged |
+| P1.5 S12 | Mobile 安全 E2E 与封板 | ✅ Completed / Merged |
+| Phase 02 | 收货链与真机正式联调 | ⏳ Pending / Ready after preflight cleanup |
 
 ## 🧠 移动端原则
 

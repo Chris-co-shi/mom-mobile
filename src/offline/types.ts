@@ -1,12 +1,28 @@
 import type { MobileAccessContext } from '@/auth';
 
-export type OfflineCommandStatus = 'PENDING' | 'SYNCING' | 'FAILED' | 'BLOCKED';
+export type OfflineCommandStatus =
+  | 'PENDING'
+  | 'SYNCING'
+  | 'COMPLETED'
+  | 'FAILED_RETRYABLE'
+  | 'CONFLICT'
+  | 'UNKNOWN_RESULT'
+  | 'CHECKING_STATUS'
+  | 'AUTH_REQUIRED'
+  | 'MANUAL_REQUIRED'
+  | 'CANCELLED';
 
-export interface OfflineCommand {
+export type OfflineCommandType = 'RECEIVE_MATERIAL' | 'LEGACY_UNMAPPED';
+
+export interface ReceiveMaterialPayload {
+  deliveryCode: string;
+}
+
+export interface OfflineCommandEnvelope<TPayload = unknown> {
   id: string;
-  endpoint: string;
-  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  payload: unknown;
+  commandType: OfflineCommandType;
+  schemaVersion: 2;
+  payload: TPayload;
   userId: string;
   sid: string;
   clientId: 'mom-mobile-pda';
@@ -17,19 +33,32 @@ export interface OfflineCommand {
   idempotencyKey: string;
   correlationId: string;
   createdAt: string;
-  schemaVersion: 1;
+  updatedAt: string;
   attempts: number;
+  nextAttemptAt: string | null;
   status: OfflineCommandStatus;
-  lastError?: string;
+  lastErrorCode?: string;
+  lastErrorMessage?: string;
+  serverSnapshot?: unknown;
 }
 
+export type OfflineCommand = OfflineCommandEnvelope;
+
 export interface OfflineCommandCreationInput {
-  endpoint: string;
-  method: OfflineCommand['method'];
+  commandType: Exclude<OfflineCommandType, 'LEGACY_UNMAPPED'>;
   payload: unknown;
-  requiredPermission: string;
   context: MobileAccessContext;
   currentFactoryId: string;
+}
+
+export interface OfflineCommandHandler {
+  commandType: Exclude<OfflineCommandType, 'LEGACY_UNMAPPED'>;
+  schemaVersion: 2;
+  requiredPermission: string;
+  path: string;
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  statusQueryStrategy: 'IDEMPOTENCY_KEY';
+  validatePayload(payload: unknown): boolean;
 }
 
 export type OfflineSyncBlockReason =
@@ -40,8 +69,21 @@ export type OfflineSyncBlockReason =
   | 'FACTORY_MISMATCH'
   | 'FACTORY_REVOKED'
   | 'PERMISSION_REVOKED'
-  | 'PARTY_MISMATCH';
+  | 'PARTY_MISMATCH'
+  | 'STATUS_NOT_SYNCABLE'
+  | 'HANDLER_UNAVAILABLE';
 
 export type OfflineSyncDecision =
   | { allowed: true }
   | { allowed: false; reason: OfflineSyncBlockReason };
+
+export interface PreparedOfflineRequest {
+  path: string;
+  method: OfflineCommandHandler['method'];
+  body: unknown;
+  headers: {
+    'Idempotency-Key': string;
+    'X-Correlation-Id': string;
+    'X-Factory-Id': string;
+  };
+}

@@ -46,6 +46,8 @@ export interface AuthRuntimeConfig {
   issuer: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
+  jwksUri: string;
+  gatewayBaseUrl: string;
   redirectUri: string;
   scope?: string;
   transactionTtlMs?: number;
