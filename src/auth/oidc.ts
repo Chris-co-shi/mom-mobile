@@ -34,11 +34,12 @@ export class RemoteJwksIdTokenValidator implements IdTokenValidator {
     const discoveryResponse = await this.transport.request<Discovery>({
       url: `${issuer}/.well-known/openid-configuration`, method: 'GET',
     });
-    if (discoveryResponse.status !== 200 || discoveryResponse.body.issuer !== issuer) {
-      throw new AuthRuntimeError('invalid_issuer', 'OIDC Discovery issuer 不匹配');
+    if (discoveryResponse.status !== 200 || discoveryResponse.body.issuer !== issuer
+      || discoveryResponse.body.jwks_uri !== input.jwksUri) {
+      throw new AuthRuntimeError('invalid_issuer', 'OIDC Discovery issuer 或 JWKS URI 与显式配置不匹配');
     }
     const jwksResponse = await this.transport.request<JsonWebKeySet>({
-      url: discoveryResponse.body.jwks_uri, method: 'GET',
+      url: input.jwksUri, method: 'GET',
     });
     const jwk = jwksResponse.body.keys?.find((candidate) => candidate.kid === header.kid);
     if (jwksResponse.status !== 200 || !jwk) {

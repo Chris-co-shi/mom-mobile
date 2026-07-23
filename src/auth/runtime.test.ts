@@ -41,8 +41,10 @@ class FakeTransport implements HttpTransport {
   businessCalls = 0;
   businessMode: 'OK' | 'EXPIRE_ONCE' | 'FORBIDDEN' = 'OK';
   tokenDelay: (() => Promise<void>) | null = null;
+  requestedUrls: string[] = [];
 
   async request<T>(request: HttpRequest): Promise<HttpResponse<T>> {
+    this.requestedUrls.push(request.url);
     if (request.url.endsWith('/oauth2/token')) {
       this.tokenCalls += 1;
       if (this.tokenDelay) await this.tokenDelay();
@@ -80,6 +82,8 @@ function runtime(
       issuer: 'https://iam.example.test',
       authorizationEndpoint: 'https://iam.example.test/oauth2/authorize',
       tokenEndpoint: 'https://iam.example.test/oauth2/token',
+      jwksUri: 'https://iam.example.test/oauth2/jwks',
+      gatewayBaseUrl: 'https://gateway.example.test',
       redirectUri: 'https://mobile.example.test/oauth2/callback',
     }, transport, storage, transactions, browser, new FakeIdTokenValidator(), () => 1_800_000, unsynced),
     storage, transactions, browser,
@@ -125,6 +129,8 @@ describe('MobileAuthRuntime', () => {
       status: 'AUTHENTICATED', currentFactoryId: 'factory-a', context: { userId: 'user-a', sid: 'sid-a' },
     });
     expect(transport.tokenCalls).toBe(1);
+    expect(transport.requestedUrls).toContain('https://gateway.example.test/api/iam/me');
+    expect(transport.requestedUrls).not.toContain('https://iam.example.test/api/iam/me');
   });
 
   it('uses one refresh flight for concurrent 401 responses and retries each request once', async () => {
@@ -135,8 +141,8 @@ describe('MobileAuthRuntime', () => {
     transport.businessMode = 'EXPIRE_ONCE';
     transport.tokenDelay = () => new Promise((resolve) => setTimeout(resolve, 5));
     const [one, two] = await Promise.all([
-      fixture.runtime.request<{ ok: boolean }>({ url: 'https://api.test/one', method: 'GET' }),
-      fixture.runtime.request<{ ok: boolean }>({ url: 'https://api.test/two', method: 'GET' }),
+      fixture.runtime.request<{ ok: boolean }>({ url: '/api/one', method: 'GET' }),
+      fixture.runtime.request<{ ok: boolean }>({ url: '/api/two', method: 'GET' }),
     ]);
     expect(one.body.ok && two.body.ok).toBe(true);
     expect(transport.tokenCalls).toBe(2);
@@ -149,7 +155,7 @@ describe('MobileAuthRuntime', () => {
     await fixture.storage.storeInitial('refresh-initial');
     await fixture.runtime.restoreColdStart();
     transport.businessMode = 'FORBIDDEN';
-    await expect(fixture.runtime.request({ url: 'https://api.test/forbidden', method: 'GET' }))
+    await expect(fixture.runtime.request({ url: '/api/forbidden', method: 'GET' }))
       .rejects.toMatchObject({ status: 403 });
     expect(transport.tokenCalls).toBe(1);
   });
@@ -164,5 +170,14 @@ describe('MobileAuthRuntime', () => {
     expect(fixture.runtime.getSnapshot().status).toBe('REAUTHENTICATION_REQUIRED');
     await expect(fixture.runtime.restoreColdStart()).resolves.toBe(false);
     expect(transport.tokenCalls).toBe(1);
+  });
+
+  it('rejects Bearer requests that bypass the configured Gateway', async () => {
+    const transport = new FakeTransport();
+    const fixture = runtime(transport);
+    await fixture.storage.storeInitial('refresh-initial');
+    await fixture.runtime.restoreColdStart();
+    await expect(fixture.runtime.request({ url: 'https://service.example.test/api/wms/receipts', method: 'GET' }))
+      .rejects.toMatchObject({ code: 'invalid_business_api_url' });
   });
 });
